@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>将棋 動かせる盤</title>
+    <style>
+      :root{
+        --page-bg:#efe0bd;
+        --page-bg2:#e7d3a4;
+        --ink:#2b1d0e;
+        --ink-soft:#5a4632;
+        --panel:#f7ecd2;
+        --panel-line:#c9ab72;
+        --board-bg:#ecca8b;
+        --board-line:#7a5c2e;
+        --cell-line:#a37f42;
+        --piece-face:#f8e7b8;
+        --piece-face2:#eed49a;
+        --piece-edge:#6e5326;
+        --piece-ink:#241806;
+        --promo:#b02318;
+        --accent:#8a5a1d;
+        --accent-ink:#fff8ea;
+        --tab-bg:#e2cd9c;
+        --tab-active:#8a5a1d;
+        --btn-bg:#fdf6e0;
+        --btn-line:#8a6a35;
+        --shadow:0 2px 10px rgba(90,60,10,.18);
+      }
+      * { box-sizing: border-box; }
+      html,body{ margin:0; padding:0; }
+      body{
+        font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic UI","Yu Gothic",Meiryo,sans-serif;
+        background:linear-gradient(180deg,var(--page-bg),var(--page-bg2));
+        color:var(--ink);
+        min-height:100vh;
+      }
+      main{ max-width:640px; margin:0 auto; padding:16px 14px 40px; }
+      .tabs{ display:flex; gap:8px; margin:6px 0 10px; }
+      .tab{
+        flex:1 1 0; min-height:48px; padding:10px 8px;
+        font-size:15px; font-weight:700; line-height:1.35;
+        color:var(--ink); background:var(--tab-bg);
+        border:1.5px solid var(--panel-line); border-radius:10px;
+        cursor:pointer; font-family:inherit;
+      }
+      .tab small{ display:block; font-size:11.5px; font-weight:400; color:var(--ink-soft); }
+      .tab[aria-selected="true"]{ background:var(--tab-active); color:var(--accent-ink); border-color:var(--tab-active); }
+      .tab[aria-selected="true"] small{ color:#f3dfae; }
+      .howto{ font-size:13.5px; color:var(--ink-soft); margin:2px 2px 14px; }
+      .panel{
+        background:var(--panel); border:1.5px solid var(--panel-line);
+        border-radius:14px; padding:18px 16px 20px; box-shadow:var(--shadow);
+      }
+      h2{ font-size:21px; margin:0 0 8px; letter-spacing:.02em; }
+      .players{ font-size:14.5px; line-height:1.6; margin:0 0 10px; font-weight:600; }
+      .highlight{ font-size:14.5px; line-height:1.75; margin:0 0 16px; color:var(--ink); }
+      /* ---- board ---- */
+      .board-frame{ max-width:520px; margin:0 auto; }
+      .board{
+        display:grid; grid-template-columns:repeat(9,1fr) 1.4em;
+        background:var(--board-bg);
+        border:2.5px solid var(--board-line);
+        padding:6px 6px 6px 8px;
+        box-shadow:inset 0 0 0 1px rgba(122,92,46,.35), 0 1px 6px rgba(90,60,10,.25);
+      }
+      .coord{ display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--ink-soft); font-weight:600; }
+      .coord.file{ height:1.5em; }
+      .coord.rank{ padding-left:2px; }
+      .cell{
+        aspect-ratio:1/1.08; border:.5px solid var(--cell-line);
+        display:flex; align-items:center; justify-content:center;
+        position:relative;
+      }
+      .piece{
+        width:88%; height:92%;
+        clip-path:polygon(50% 0%, 96% 21%, 86% 100%, 14% 100%, 4% 21%);
+        background:var(--piece-edge);
+        display:flex; align-items:center; justify-content:center;
+      }
+      .piece-in{
+        width:calc(100% - 3px); height:calc(100% - 3px);
+        clip-path:polygon(50% 0%, 96% 21%, 86% 100%, 14% 100%, 4% 21%);
+        background:linear-gradient(180deg,var(--piece-face),var(--piece-face2));
+        display:flex; align-items:center; justify-content:center;
+      }
+      .piece span{
+        font-family:"Hiragino Mincho ProN","Hiragino Mincho Pro","Yu Mincho",YuMincho,"Kozuka Mincho Pro",serif;
+        font-weight:700; color:var(--piece-ink);
+        font-size:clamp(13px,4.4vw,23px); line-height:1;
+        transform:translateY(8%);
+      }
+      .piece.two span{ font-size:clamp(9px,3vw,15px); letter-spacing:-.05em; }
+      .piece.promo span{ color:var(--promo); }
+      .piece.gote{ transform:rotate(180deg); }
+      /* ---- hands & controls ---- */
+      .hands{ max-width:520px; margin:12px auto 0; font-size:15px; line-height:1.7; }
+      .hands .who{ font-weight:700; }
+      .nav{
+        max-width:520px; margin:14px auto 0;
+        display:flex; align-items:center; gap:10px;
+      }
+      .nav button{
+        flex:0 0 auto; min-height:48px; padding:10px 18px;
+        font-size:16px; font-weight:700; font-family:inherit;
+        color:var(--ink); background:var(--btn-bg);
+        border:1.5px solid var(--btn-line); border-radius:10px; cursor:pointer;
+      }
+      .nav button:disabled{ opacity:.35; cursor:default; }
+      .nav button:active:not(:disabled){ background:var(--tab-bg); }
+      #info{ flex:1 1 auto; text-align:center; font-size:15px; font-weight:700; white-space:nowrap; }
+      .jumps{ max-width:520px; margin:14px auto 0; }
+      .jumps .jlabel{ font-size:13px; font-weight:700; color:var(--ink-soft); margin:0 0 6px; }
+      .jumps .jrow{ display:flex; flex-wrap:wrap; gap:8px; }
+      .jump{
+        min-height:44px; padding:8px 14px;
+        font-size:14px; font-weight:700; font-family:inherit;
+        color:var(--ink); background:var(--btn-bg);
+        border:1.5px solid var(--btn-line); border-radius:10px; cursor:pointer;
+      }
+      .jump[aria-pressed="true"]{ background:var(--tab-active); color:var(--accent-ink); border-color:var(--tab-active); }
+      .slider-row{ max-width:520px; margin:10px auto 0; display:flex; align-items:center; gap:10px; }
+      .slider-row .edge{ font-size:12px; color:var(--ink-soft); white-space:nowrap; }
+      input[type=range]{ flex:1 1 auto; height:40px; accent-color:var(--accent); cursor:pointer; }
+      @media (max-width:560px){
+        .nav{ flex-wrap:wrap; }
+        #info{ order:-1; flex:1 1 100%; margin-bottom:2px; }
+        .nav button{ flex:1 1 0; }
+      }
+      .note{
+        max-width:520px; margin:18px auto 0; padding:14px 16px;
+        background:var(--btn-bg); border:1.5px solid var(--panel-line); border-radius:10px;
+      }
+      .note h3{ font-size:16px; margin:0 0 6px; }
+      .note p{ font-size:14.5px; line-height:1.8; margin:0; }
+      .article-link{ margin:18px 0 0; font-size:14px; }
+      .article-link a{ color:var(--accent); font-weight:700; display:inline-block; padding:8px 0; }
+      footer{ max-width:640px; margin:18px auto 0; padding:0 16px; }
+      footer p{ font-size:12px; color:var(--ink-soft); line-height:1.6; margin:0; }
+      @media (prefers-color-scheme: dark){
+        :root{
+          --page-bg:#251a0c; --page-bg2:#191106;
+          --ink:#f4e7c8; --ink-soft:#c8ab7d;
+          --panel:#31220f; --panel-line:#6d5327;
+          --tab-bg:#3a2a12; --btn-bg:#3a2a12; --btn-line:#a37f42;
+          --shadow:0 2px 10px rgba(0,0,0,.5);
+        }
+        .tab[aria-selected="true"] small{ color:#f3dfae; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="tabs" role="tablist" aria-label="対局の切り替え">
+        <button class="tab" role="tab" id="tab-ryuou39-3" data-game="ryuou39-3" aria-selected="true">第39期竜王戦 第3局<small>藤井聡太竜王 対 服部慎一郎七段</small></button>
+        <button class="tab" role="tab" id="tab-ryuou20-1" data-game="ryuou20-1" aria-selected="false">第20期竜王戦 第1局<small>佐藤康光二冠 対 渡辺明竜王</small></button>
+      </div>
+      <p class="howto">ボタンやスライダーで手を進めたり戻したりできます。「見たい局面」のボタンで、封じ手や決め手、終局図へ直接移動できます。</p>
+
+      <section class="panel" aria-live="polite">
+        <h2 id="g-title"></h2>
+        <p class="players" id="g-players"></p>
+        <p class="highlight" id="g-highlight"></p>
+
+        <div class="board-frame">
+          <div class="board" id="board" aria-label="将棋盤"></div>
+        </div>
+
+        <div class="hands">
+          <div><span class="who">☗先手の持駒：</span><span id="hand-sente"></span></div>
+          <div><span class="who">☖後手の持駒：</span><span id="hand-gote"></span></div>
+        </div>
+
+        <div class="nav">
+          <button id="prev" type="button">← 前へ</button>
+          <span id="info"></span>
+          <button id="next" type="button">次へ →</button>
+        </div>
+        <div class="jumps">
+          <p class="jlabel">見たい局面</p>
+          <div class="jrow" id="jumps"></div>
+        </div>
+
+        <div class="slider-row">
+          <span class="edge">0手目</span>
+          <input type="range" id="slider" min="0" step="1" value="0" aria-label="手数を選ぶ" />
+          <span class="edge" id="slider-max"></span>
+        </div>
+
+        <section class="note" id="g-note" hidden>
+          <h3 id="g-note-title"></h3>
+          <p id="g-note-text"></p>
+        </section>
+
+        <p class="article-link"><a id="g-article" href="#" target="_blank" rel="noopener">この対局の記事を読む →</a></p>
+      </section>
+
+      <footer>
+        <p>棋譜は日本将棋連盟・竜王戦中継plusおよび棋譜速報の公開情報に基づく。</p>
+      </footer>
+    </main>
+
+    <script>
+      var GAMES = {
+        "ryuou39-3": {
+          title: "第39期竜王戦第3局",
+          players: "先手：藤井聡太竜王 ／ 後手：服部慎一郎七段 ― 119手で藤井竜王の勝ち（2026年11月3日・4日、京都市・仁和寺）",
+          highlight: "藤井竜王が四枚穴熊に組み、62手目の封じ手△3六歩（3五の後手の歩が3六の先手の歩を取る手）から攻勢に出て押し切った一局。終盤は服部玉を受けなしに追い込み、119手目▲8三銀成で決着しました。",
+          article: "https://sorita08shogi.hatenablog.com/entry/2026/11/19/101400",
+          startAt: "end",
+          jumps: [{ label: "封じ手の直前（61手目）", ply: 61 }, { label: "終局図（119手目）", ply: 119 }, { label: "詰みまでの参考手順", ply: 127 }],
+          realEnd: 119,
+          refLabels: { 120: "参考手順 1手目 △7一玉", 121: "参考手順 2手目 ▲8二成銀", 122: "参考手順 3手目 △6二玉", 123: "参考手順 4手目 ▲5二飛打", 124: "参考手順 5手目 △6三玉", 125: "参考手順 6手目 ▲6二飛成", 126: "参考手順 7手目 △同玉", 127: "参考手順 8手目 ▲7二角成（詰み）" },
+          noteTitle: "投了の理由",
+          note: "投了の理由：終局図で服部七段が投了しました。藤井竜王の角（6一）と成銀（8三）が後手玉に迫り、後手の飛車（8二）が7二を守っているのが最後の支えです。その飛車が7二の守りを外すと、▲7二角成で詰みになります。終局から先の参考手順も盤で再生できます。玉が△7一玉と逃げる受けには、▲8二成銀と飛車を取り、▲5二飛打と攻めをつないで、最後は▲7二角成で詰みます。",
+          sfens: ["lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1","lnsgkgsnl/1r5b1/ppppppppp/9/9/7P1/PPPPPPP1P/1B5R1/LNSGKGSNL w - 2","lnsgkgsnl/1r5b1/p1ppppppp/1p7/9/7P1/PPPPPPP1P/1B5R1/LNSGKGSNL b - 3","lnsgkgsnl/1r5b1/p1ppppppp/1p7/7P1/9/PPPPPPP1P/1B5R1/LNSGKGSNL w - 4","lnsgk1snl/1r4gb1/p1ppppppp/1p7/7P1/9/PPPPPPP1P/1B5R1/LNSGKGSNL b - 5","lnsgk1snl/1r4gb1/p1ppppppp/1p7/7P1/2P6/PP1PPPP1P/1B5R1/LNSGKGSNL w - 6","lnsgk1snl/1r4gb1/p1ppppppp/9/1p5P1/2P6/PP1PPPP1P/1B5R1/LNSGKGSNL b - 7","lnsgk1snl/1r4gb1/p1ppppppp/9/1p5P1/2P6/PPBPPPP1P/7R1/LNSGKGSNL w - 8","lnsgk1snl/1r4gb1/p1pppp1pp/6p2/1p5P1/2P6/PPBPPPP1P/7R1/LNSGKGSNL b - 9","lnsgk1snl/1r4gb1/p1pppp1pp/6p2/1p5P1/2P6/PPBPPPP1P/3S3R1/LN1GKGSNL w - 10","lnsgk1snl/1r4g2/p1pppp1pp/6p2/1p5P1/2P6/PP+bPPPP1P/3S3R1/LN1GKGSNL b b 11","lnsgk1snl/1r4g2/p1pppp1pp/6p2/1p5P1/2P6/PPSPPPP1P/7R1/LN1GKGSNL w Bb 12","lnsgk2nl/1r4gs1/p1pppp1pp/6p2/1p5P1/2P6/PPSPPPP1P/7R1/LN1GKGSNL b Bb 13","lnsgk2nl/1r4gs1/p1pppp1pp/6p2/1p5P1/2P6/PPSPPPP1P/5S1R1/LN1GKG1NL w Bb 14","lnsgk2nl/1r4g2/p1ppppspp/6p2/1p5P1/2P6/PPSPPPP1P/5S1R1/LN1GKG1NL b Bb 15","lnsgk2nl/1r4g2/p1ppppspp/6p2/1p5P1/2P2P3/PPSPP1P1P/5S1R1/LN1GKG1NL w Bb 16","ln1gk2nl/1r1s2g2/p1ppppspp/6p2/1p5P1/2P2P3/PPSPP1P1P/5S1R1/LN1GKG1NL b Bb 17","ln1gk2nl/1r1s2g2/p1ppppspp/6p2/1p5P1/2P2P3/PPSPP1P1P/2G2S1R1/LN2KG1NL w Bb 18","ln1gk2nl/1r1s2g2/p1ppppsp1/6p1p/1p5P1/2P2P3/PPSPP1P1P/2G2S1R1/LN2KG1NL b Bb 19","ln1gk2nl/1r1s2g2/p1ppppsp1/6p1p/1p5P1/2P2P2P/PPSPP1P2/2G2S1R1/LN2KG1NL w Bb 20","ln1gk2nl/1r1s2g2/p2pppsp1/2p3p1p/1p5P1/2P2P2P/PPSPP1P2/2G2S1R1/LN2KG1NL b Bb 21","ln1gk2nl/1r1s2g2/p2pppsp1/2p3p1p/1p5P1/2P2P2P/PPSPPSP2/2G4R1/LN2KG1NL w Bb 22","ln1gk2nl/1r1s2g2/p3ppsp1/2pp2p1p/1p5P1/2P2P2P/PPSPPSP2/2G4R1/LN2KG1NL b Bb 23","ln1gk2nl/1r1s2g2/p3ppsp1/2pp2p1p/1p5P1/2P2PP1P/PPSPPS3/2G4R1/LN2KG1NL w Bb 24","ln1gk2nl/1r1s2g2/4ppsp1/p1pp2p1p/1p5P1/2P2PP1P/PPSPPS3/2G4R1/LN2KG1NL b Bb 25","ln1gk2nl/1r1s2g2/4ppsp1/p1pp2p1p/1p5P1/P1P2PP1P/1PSPPS3/2G4R1/LN2KG1NL w Bb 26","ln1gk2nl/1r4g2/3sppsp1/p1pp2p1p/1p5P1/P1P2PP1P/1PSPPS3/2G4R1/LN2KG1NL b Bb 27","ln1gk2nl/1r4g2/3sppsp1/p1pp2p1p/1p5P1/P1P2PP1P/1PSPPS3/2GK3R1/LN3G1NL w Bb 28","ln1g3nl/1r3kg2/3sppsp1/p1pp2p1p/1p5P1/P1P2PP1P/1PSPPS3/2GK3R1/LN3G1NL b Bb 29","ln1g3nl/1r3kg2/3sppsp1/p1pp2p1p/1p5P1/P1P2PP1P/1PSPPSN2/2GK3R1/LN3G2L w Bb 30","l2g3nl/1r3kg2/2nsppsp1/p1pp2p1p/1p5P1/P1P2PP1P/1PSPPSN2/2GK3R1/LN3G2L b Bb 31","l2g3nl/1r3kg2/2nsppsp1/p1pp2p1p/1p5P1/P1P2PP1P/1PSPPSN2/2GK1G1R1/LN6L w Bb 32","lr1g3nl/5kg2/2nsppsp1/p1pp2p1p/1p5P1/P1P2PP1P/1PSPPSN2/2GK1G1R1/LN6L b Bb 33","lr1g3nl/5kg2/2nsppsp1/p1pp2p1p/1p5P1/P1P1SPP1P/1PSPP1N2/2GK1G1R1/LN6L w Bb 34","lr5nl/4gkg2/2nsppsp1/p1pp2p1p/1p5P1/P1P1SPP1P/1PSPP1N2/2GK1G1R1/LN6L b Bb 35","lr5nl/4gkg2/2nsppsp1/p1pp2p1p/1p5P1/P1PPSPP1P/1PS1P1N2/2GK1G1R1/LN6L w Bb 36","lr2k2nl/4g1g2/2nsppsp1/p1pp2p1p/1p5P1/P1PPSPP1P/1PS1P1N2/2GK1G1R1/LN6L b Bb 37","lr2k2nl/4g1g2/2nsppsp1/p1pp2p1p/1p5P1/P1PPSPP1P/1PS1P1N2/2G2G1R1/LNK5L w Bb 38","lr5nl/3kg1g2/2nsppsp1/p1pp2p1p/1p5P1/P1PPSPP1P/1PS1P1N2/2G2G1R1/LNK5L b Bb 39","lr5nl/3kg1g2/2nsppsp1/p1pp2p1p/1p5P1/P1PPSPP1P/1PS1P1N2/1KG2G1R1/LN6L w Bb 40","lr5nl/2k1g1g2/2nsppsp1/p1pp2p1p/1p5P1/P1PPSPP1P/1PS1P1N2/1KG2G1R1/LN6L b Bb 41","lr5nl/2k1g1g2/2nsppsp1/p1pp2p1p/1p5P1/P1PPSPP1P/1PS1P1N2/1KG1G2R1/LN6L w Bb 42","lr5nl/3kg1g2/2nsppsp1/p1pp2p1p/1p5P1/P1PPSPP1P/1PS1P1N2/1KG1G2R1/LN6L b Bb 43","lr5nl/3kg1g2/2nsppsp1/p1pp2p1p/1p5P1/P1PP1PP1P/1PSSP1N2/1KG1G2R1/LN6L w Bb 44","lr5nl/2k1g1g2/2nsppsp1/p1pp2p1p/1p5P1/P1PP1PP1P/1PSSP1N2/1KG1G2R1/LN6L b Bb 45","lr5nl/2k1g1g2/2nsppsp1/p1pp2p1p/1p5P1/P1PP1PP1P/1PSSP1N2/LKG1G2R1/1N6L w Bb 46","lr5nl/3kg1g2/2nsppsp1/p1pp2p1p/1p5P1/P1PP1PP1P/1PSSP1N2/LKG1G2R1/1N6L b Bb 47","lr5nl/3kg1g2/2nsppsp1/p1pp2p1p/1p5P1/P1PP1PP1P/1PSSP1N2/L1G1G2R1/KN6L w Bb 48","lr2k2nl/4g1g2/2nsppsp1/p1pp2p1p/1p5P1/P1PP1PP1P/1PSSP1N2/L1G1G2R1/KN6L b Bb 49","lr2k2nl/4g1g2/2nsppsp1/p1pp2p1p/1p5P1/P1PP1PP1P/1PSSP1N2/LG2G2R1/KN6L w Bb 50","lr5nl/4gkg2/2nsppsp1/p1pp2p1p/1p5P1/P1PP1PP1P/1PSSP1N2/LG2G2R1/KN6L b Bb 51","lr5nl/4gkg2/2nsppsp1/p1pp2p1p/1p5P1/P1PP1PP1P/1PS1P1N2/LGS1G2R1/KN6L w Bb 52","lr5nl/4gkg2/2nsp1sp1/p1pp1pp1p/1p5P1/P1PP1PP1P/1PS1P1N2/LGS1G2R1/KN6L b Bb 53","lr5nl/4gkg2/2nsp1sp1/p1pp1pp1p/1p5P1/P1PP1PP1P/1PSGP1N2/LGS4R1/KN6L w Bb 54","lr5nl/4gkg2/2nsp1sp1/p1p2pp1p/1p1p3P1/P1PP1PP1P/1PSGP1N2/LGS4R1/KN6L b Bb 55","lr5nl/4gkg2/2nsp1sp1/p1p2pp1p/1p1p1P1P1/P1PP2P1P/1PSGP1N2/LGS4R1/KN6L w Bb 56","lr5nl/4gkg2/2nsp1sp1/2p2pp1p/pp1p1P1P1/P1PP2P1P/1PSGP1N2/LGS4R1/KN6L b Bb 57","lr5nl/4gkg2/2nsp1sp1/2p2pp1p/Pp1p1P1P1/2PP2P1P/1PSGP1N2/LGS4R1/KN6L w BPb 58","lr5nl/4gkg2/2nsp1sp1/2p2p2p/Pp1p1PpP1/2PP2P1P/1PSGP1N2/LGS4R1/KN6L b BPb 59","lr5nl/4gkg2/2nsp1sp1/2p2p2p/Pp1p1PpP1/2PP1BP1P/1PSGP1N2/LGS4R1/KN6L w Pb 60","lr5nl/3g1kg2/2nsp1sp1/2p2p2p/Pp1p1PpP1/2PP1BP1P/1PSGP1N2/LGS4R1/KN6L b Pb 61","lr5nl/3g1kg2/2nsp1sp1/2p2P2p/Pp1p2pP1/2PP1BP1P/1PSGP1N2/LGS4R1/KN6L w 2Pb 62","lr5nl/3g1kg2/2nsp1sp1/2p2P2p/Pp1p3P1/2PP1Bp1P/1PSGP1N2/LGS4R1/KN6L b 2Pbp 63","lr5nl/3g1kg2/2nsp1sp1/2p2P2p/Pp1p1N1P1/2PP1Bp1P/1PSGP4/LGS4R1/KN6L w 2Pbp 64","lr5nl/3g1kg2/2nsp2p1/2p2s2p/Pp1p1N1P1/2PP1Bp1P/1PSGP4/LGS4R1/KN6L b 2Pb2p 65","lr5nl/3g1kg2/2nsp2p1/2p2s1Pp/Pp1p1N3/2PP1Bp1P/1PSGP4/LGS4R1/KN6L w 2Pb2p 66","lr5nl/3g1kg2/2nsp2p1/2p2s1Pp/Pp1p1N3/2PP1B2P/1PSGP1+p2/LGS4R1/KN6L b 2Pb2p 67","lr5nl/3g1kg2/2nsp2p1/2p2s1Pp/Pp1p1N3/2PP4P/1PSGP1B2/LGS4R1/KN6L w 3Pb2p 68","lr5nl/3g1kg2/2nsp4/2p2s1pp/Pp1p1N3/2PP4P/1PSGP1B2/LGS4R1/KN6L b 3Pb3p 69","lr5nl/3g1kg2/2nsp4/2p2s1pp/Pp1p1N3/2PPG3P/1PS1P1B2/LGS4R1/KN6L w 3Pb3p 70","lr5nl/3g1kg2/2n1p4/2p1ss1pp/Pp1p1N3/2PPG3P/1PS1P1B2/LGS4R1/KN6L b 3Pb3p 71","lr5nl/3g1kgP1/2n1p4/2p1ss1pp/Pp1p1N3/2PPG3P/1PS1P1B2/LGS4R1/KN6L w 2Pb3p 72","lr6l/3g1kgP1/2n1p1n2/2p1ss1pp/Pp1p1N3/2PPG3P/1PS1P1B2/LGS4R1/KN6L b 2Pb3p 73","lr6l/3g1kgP1/2n1p1+N2/2p1ss1pp/Pp1p5/2PPG3P/1PS1P1B2/LGS4R1/KN6L w N2Pb3p 74","lr6l/3g1k1P1/2n1p1g2/2p1ss1pp/Pp1p5/2PPG3P/1PS1P1B2/LGS4R1/KN6L b N2Pbn3p 75","lr6l/3g1k1P1/2n1p1g2/2p1ssPpp/Pp1p5/2PPG3P/1PS1P1B2/LGS4R1/KN6L w NPbn3p 76","lr6l/3g1k1P1/2n1p2g1/2p1ssPpp/Pp1p5/2PPG3P/1PS1P1B2/LGS4R1/KN6L b NPbn3p 77","lr5+Pl/3g1k3/2n1p2g1/2p1ssPpp/Pp1p5/2PPG3P/1PS1P1B2/LGS4R1/KN6L w NPbn3p 78","l6rl/3g1k3/2n1p2g1/2p1ssPpp/Pp1p5/2PPG3P/1PS1P1B2/LGS4R1/KN6L b NPbn4p 79","l6rl/3g1k3/2n1p2g1/2p1ssPpp/Pp1p5/2PPG2BP/1PS1P4/LGS4R1/KN6L w NPbn4p 80","l6rl/3g1k3/2n1p2g1/2p1ssPpp/Pp1p2p2/2PPG2BP/1PS1P4/LGS4R1/KN6L b NPbn3p 81","l6rl/3g1k3/2n1p2g1/2p1ssPpp/Pp1p2p2/2PPGN1BP/1PS1P4/LGS4R1/KN6L w Pbn3p 82","l6rl/3g1k3/2n1p2g1/2p1ssPpp/Pp1p2p2/2PPGN1BP/pPS1P4/LGS4R1/KN6L b Pbn2p 83","l6rl/3g1k3/2n1p2g1/2p1ssPpp/Pp1p2p2/2PPGN1BP/LPS1P4/1GS4R1/KN6L w 2Pbn2p 84","l6rl/3g1k3/2n1p2g1/2p1ssPpp/Pp1p2p2/p1PPGN1BP/LPS1P4/1GS4R1/KN6L b 2Pbnp 85","l6rl/3g1k3/2n1p2g1/2p1ssPpp/Pp1p2p2/L1PPGN1BP/1PS1P4/1GS4R1/KN6L w 3Pbnp 86","l6rl/3g1k3/2n1p2g1/1np1ssPpp/Pp1p2p2/L1PPGN1BP/1PS1P4/1GS4R1/KN6L b 3Pbp 87","l6rl/3g1k3/2n1p2g1/1np1NsPpp/Pp1p2p2/L1PPG2BP/1PS1P4/1GS4R1/KN6L w S3Pbp 88","l6rl/3g1k3/2n4g1/1np1psPpp/Pp1p2p2/L1PPG2BP/1PS1P4/1GS4R1/KN6L b S3Pbnp 89","l6rl/3g1k3/2n3Sg1/1np1psPpp/Pp1p2p2/L1PPG2BP/1PS1P4/1GS4R1/KN6L w 3Pbnp 90","l6rl/3g1k3/2n3sg1/1np1p1Ppp/Pp1p2p2/L1PPG2BP/1PS1P4/1GS4R1/KN6L b 3Pbsnp 91","l6rl/3g1k3/2n3+Pg1/1np1p2pp/Pp1p2p2/L1PPG2BP/1PS1P4/1GS4R1/KN6L w S3Pbsnp 92","l6rl/3g1k3/2n3g2/1np1p2pp/Pp1p2p2/L1PPG2BP/1PS1P4/1GS4R1/KN6L b S3Pbsn2p 93","l6rl/3g1k3/2n3g2/1np1p2pp/Pp1p2B2/L1PPG3P/1PS1P4/1GS4R1/KN6L w S4Pbsn2p 94","l6rl/3g1k3/2n1s1g2/1np1p2pp/Pp1p2B2/L1PPG3P/1PS1P4/1GS4R1/KN6L b S4Pbn2p 95","l6rl/3g1k3/2n1sPg2/1np1p2pp/Pp1p2B2/L1PPG3P/1PS1P4/1GS4R1/KN6L w S3Pbn2p 96","l6rl/3gk4/2n1sPg2/1np1p2pp/Pp1p2B2/L1PPG3P/1PS1P4/1GS4R1/KN6L b S3Pbn2p 97","l6rl/3gkS3/2n1sPg2/1np1p2pp/Pp1p2B2/L1PPG3P/1PS1P4/1GS4R1/KN6L w 3Pbn2p 98","l6rl/3gkS3/2n1sg3/1np1p2pp/Pp1p2B2/L1PPG3P/1PS1P4/1GS4R1/KN6L b 3Pbn3p 99","l6rl/3gk4/2n1+Sg3/1np1p2pp/Pp1p2B2/L1PPG3P/1PS1P4/1GS4R1/KN6L w S3Pbn3p 100","l6rl/3gk4/2n1g4/1np1p2pp/Pp1p2B2/L1PPG3P/1PS1P4/1GS4R1/KN6L b S3Pbsn3p 101","l6rl/3gk4/2n1gP3/1np1p2pp/Pp1p2B2/L1PPG3P/1PS1P4/1GS4R1/KN6L w S2Pbsn3p 102","l6rl/3gk4/2n1gP3/1np1pp1pp/Pp1p2B2/L1PPG3P/1PS1P4/1GS4R1/KN6L b S2Pbsn2p 103","l6rl/3gk4/2n1gP3/1np1pp1Rp/Pp1p2B2/L1PPG3P/1PS1P4/1GS6/KN6L w S3Pbsn2p 104","l6rl/3gk4/2n1gP1s1/1np1pp1Rp/Pp1p2B2/L1PPG3P/1PS1P4/1GS6/KN6L b S3Pbn2p 105","l6rl/3gk4/2n1gP1s1/1np1pR2p/Pp1p2B2/L1PPG3P/1PS1P4/1GS6/KN6L w S4Pbn2p 106","l6rl/3gk4/2n2P1s1/1np1pg2p/Pp1p2B2/L1PPG3P/1PS1P4/1GS6/KN6L b S4Prbn2p 107","l6rl/3gk4/2n2P1s1/1np1pB2p/Pp1p5/L1PPG3P/1PS1P4/1GS6/KN6L w GS4Prbn2p 108","l6rl/3gk4/2n1bP1s1/1np1pB2p/Pp1p5/L1PPG3P/1PS1P4/1GS6/KN6L b GS4Prn2p 109","l6rl/3gk4/2n1+BP1s1/1np1p3p/Pp1p5/L1PPG3P/1PS1P4/1GS6/KN6L w BGS4Prn2p 110","l6rl/4k4/2n1gP1s1/1np1p3p/Pp1p5/L1PPG3P/1PS1P4/1GS6/KN6L b BGS4Prbn2p 111","l6rl/4k2P1/2n1gP1s1/1np1p3p/Pp1p5/L1PPG3P/1PS1P4/1GS6/KN6L w BGS3Prbn2p 112","lr6l/4k2P1/2n1gP1s1/1np1p3p/Pp1p5/L1PPG3P/1PS1P4/1GS6/KN6L b BGS3Prbn2p 113","lr6l/2S1k2P1/2n1gP1s1/1np1p3p/Pp1p5/L1PPG3P/1PS1P4/1GS6/KN6L w BG3Prbn2p 114","l7l/1rS1k2P1/2n1gP1s1/1np1p3p/Pp1p5/L1PPG3P/1PS1P4/1GS6/KN6L b BG3Prbn2p 115","l2B4l/1rS1k2P1/2n1gP1s1/1np1p3p/Pp1p5/L1PPG3P/1PS1P4/1GS6/KN6L w G3Prbn2p 116","l2Bk3l/1rS4P1/2n1gP1s1/1np1p3p/Pp1p5/L1PPG3P/1PS1P4/1GS6/KN6L b G3Prbn2p 117","l2Bk3l/1rS2G1P1/2n1gP1s1/1np1p3p/Pp1p5/L1PPG3P/1PS1P4/1GS6/KN6L w 3Prbn2p 118","l2B4l/1rSk1G1P1/2n1gP1s1/1np1p3p/Pp1p5/L1PPG3P/1PS1P4/1GS6/KN6L b 3Prbn2p 119","l2B4l/1r1k1G1P1/1+Sn1gP1s1/1np1p3p/Pp1p5/L1PPG3P/1PS1P4/1GS6/KN6L w 3Prbn2p 120","l1kB4l/1r3G1P1/1+Sn1gP1s1/1np1p3p/Pp1p5/L1PPG3P/1PS1P4/1GS6/KN6L b 3Prbn2p 121","l1kB4l/1+S3G1P1/2n1gP1s1/1np1p3p/Pp1p5/L1PPG3P/1PS1P4/1GS6/KN6L w R3Prbn2p 122","l2B4l/1+S1k1G1P1/2n1gP1s1/1np1p3p/Pp1p5/L1PPG3P/1PS1P4/1GS6/KN6L b R3Prbn2p 123","l2B4l/1+S1kRG1P1/2n1gP1s1/1np1p3p/Pp1p5/L1PPG3P/1PS1P4/1GS6/KN6L w 3Prbn2p 124","l2B4l/1+S2RG1P1/2nkgP1s1/1np1p3p/Pp1p5/L1PPG3P/1PS1P4/1GS6/KN6L b 3Prbn2p 125","l2B4l/1+S1+R1G1P1/2nkgP1s1/1np1p3p/Pp1p5/L1PPG3P/1PS1P4/1GS6/KN6L w 3Prbn2p 126","l2B4l/1+S1k1G1P1/2n1gP1s1/1np1p3p/Pp1p5/L1PPG3P/1PS1P4/1GS6/KN6L b 3P2rbn2p 127","l7l/1+S+Bk1G1P1/2n1gP1s1/1np1p3p/Pp1p5/L1PPG3P/1PS1P4/1GS6/KN6L w 3P2rbn2p 128"]
+        },
+        "ryuou20-1": {
+          title: "第20期竜王戦第1局",
+          players: "先手：佐藤康光二冠 ／ 後手：渡辺明竜王 ― 114手で渡辺竜王の勝ち（2007年10月16日・17日、大阪府堺市）",
+          highlight: "渡辺竜王が後手番の矢倉から終盤に鋭く踏み込んだ一局。決め手は112手目△5八角で、渡辺竜王自身が『勝ちと思った』と振り返った一手。△8八金まで114手で佐藤二冠が投了しました。",
+          article: "https://sorita08shogi.hatenablog.com/entry/2026/11/19/101702",
+          startAt: "end",
+          jumps: [{ label: "決め手の直前（111手目）", ply: 111 }, { label: "終局図（114手目）", ply: 114 }, { label: "詰みまでの参考手順", ply: 116 }],
+          realEnd: 114,
+          refLabels: { 115: "参考手順 1手目 ▲7七玉", 116: "参考手順 2手目 △7八金打（詰み）" },
+          noteTitle: "投了後の詰み筋",
+          note: "投了後の詰み筋：終局図は、最後の手△8八金で王手がかかっている局面です。受ける手は▲7七玉と▲6八玉の2手だけでした。▲7七玉と逃げると△7八金打で詰みます。この参考手順は盤を終局から1手進めると再生できます。佐藤二冠は受け切れないと判断し、この王手で投了しました。",
+          sfens: ["lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1","lnsgkgsnl/1r5b1/ppppppppp/9/9/2P6/PP1PPPPPP/1B5R1/LNSGKGSNL w - 2","lnsgkgsnl/1r5b1/p1ppppppp/1p7/9/2P6/PP1PPPPPP/1B5R1/LNSGKGSNL b - 3","lnsgkgsnl/1r5b1/p1ppppppp/1p7/9/2P6/PP1PPPPPP/1B1S3R1/LN1GKGSNL w - 4","lnsgkgsnl/1r5b1/p1pppp1pp/1p4p2/9/2P6/PP1PPPPPP/1B1S3R1/LN1GKGSNL b - 5","lnsgkgsnl/1r5b1/p1pppp1pp/1p4p2/9/2PP5/PP2PPPPP/1B1S3R1/LN1GKGSNL w - 6","ln1gkgsnl/1r1s3b1/p1pppp1pp/1p4p2/9/2PP5/PP2PPPPP/1B1S3R1/LN1GKGSNL b - 7","ln1gkgsnl/1r1s3b1/p1pppp1pp/1p4p2/9/2PPP4/PP3PPPP/1B1S3R1/LN1GKGSNL w - 8","ln1gkgsnl/1r1s3b1/p1pp1p1pp/1p2p1p2/9/2PPP4/PP3PPPP/1B1S3R1/LN1GKGSNL b - 9","ln1gkgsnl/1r1s3b1/p1pp1p1pp/1p2p1p2/9/2PPP4/PP3PPPP/1B1S1S1R1/LN1GKG1NL w - 10","ln1gkg1nl/1r1s1s1b1/p1pp1p1pp/1p2p1p2/9/2PPP4/PP3PPPP/1B1S1S1R1/LN1GKG1NL b - 11","ln1gkg1nl/1r1s1s1b1/p1pp1p1pp/1p2p1p2/9/2PPP4/PP3PPPP/1BGS1S1R1/LN2KG1NL w - 12","ln1gk2nl/1r1s1sgb1/p1pp1p1pp/1p2p1p2/9/2PPP4/PP3PPPP/1BGS1S1R1/LN2KG1NL b - 13","ln1gk2nl/1r1s1sgb1/p1pp1p1pp/1p2p1p2/9/2PPP4/PP3PPPP/1BGS1S1R1/LN1K1G1NL w - 14","ln1g1k1nl/1r1s1sgb1/p1pp1p1pp/1p2p1p2/9/2PPP4/PP3PPPP/1BGS1S1R1/LN1K1G1NL b - 15","ln1g1k1nl/1r1s1sgb1/p1pp1p1pp/1p2p1p2/9/2PPP4/PP3PPPP/1BGSGS1R1/LN1K3NL w - 16","ln3k1nl/1r1sgsgb1/p1pp1p1pp/1p2p1p2/9/2PPP4/PP3PPPP/1BGSGS1R1/LN1K3NL b - 17","ln3k1nl/1r1sgsgb1/p1pp1p1pp/1p2p1p2/9/2PPP4/PPS2PPPP/1BG1GS1R1/LN1K3NL w - 18","ln3k1nl/1r1sg1gb1/p1pp1pspp/1p2p1p2/9/2PPP4/PPS2PPPP/1BG1GS1R1/LN1K3NL b - 19","ln3k1nl/1r1sg1gb1/p1pp1pspp/1p2p1p2/9/2PPP4/PPS2PPPP/2G1GS1R1/LNBK3NL w - 20","ln3kbnl/1r1sg1g2/p1pp1pspp/1p2p1p2/9/2PPP4/PPS2PPPP/2G1GS1R1/LNBK3NL b - 21","ln3kbnl/1r1sg1g2/p1pp1pspp/1p2p1p2/9/2PPP1P2/PPS2P1PP/2G1GS1R1/LNBK3NL w - 22","ln3kbnl/1r1sg1g2/p1pp2spp/1p2ppp2/9/2PPP1P2/PPS2P1PP/2G1GS1R1/LNBK3NL b - 23","ln3kbnl/1r1sg1g2/p1pp2spp/1p2ppp2/9/2PPP1P2/PPSG1P1PP/2G2S1R1/LNBK3NL w - 24","ln3kbnl/1r1sg1g2/p2p2spp/1pp1ppp2/9/2PPP1P2/PPSG1P1PP/2G2S1R1/LNBK3NL b - 25","ln3kbnl/1r1sg1g2/p2p2spp/1pp1ppp2/9/2PPP1P2/PPSG1P1PP/2GB1S1R1/LN1K3NL w - 26","ln3kbnl/1r1s2g2/p2p1gspp/1pp1ppp2/9/2PPP1P2/PPSG1P1PP/2GB1S1R1/LN1K3NL b - 27","ln3kbnl/1r1s2g2/p2p1gspp/1pp1ppp2/9/2PPP1P2/PPSG1P1PP/2GB1S1R1/LNK4NL w - 28","ln3k1nl/1r1s2g2/p2p1gspp/1ppbppp2/9/2PPP1P2/PPSG1P1PP/2GB1S1R1/LNK4NL b - 29","ln3k1nl/1r1s2g2/p2p1gspp/1ppbppp2/9/2PPP1P2/PPSG1PNPP/2GB1S1R1/LNK5L w - 30","ln4knl/1r1s2g2/p2p1gspp/1ppbppp2/9/2PPP1P2/PPSG1PNPP/2GB1S1R1/LNK5L b - 31","ln4knl/1r1s2g2/p2p1gspp/1ppbppp2/9/2PPP1P2/PPSG1PNPP/1KGB1S1R1/LN6L w - 32","ln5nl/1r1s2gk1/p2p1gspp/1ppbppp2/9/2PPP1P2/PPSG1PNPP/1KGB1S1R1/LN6L b - 33","ln5nl/1r1s2gk1/p2p1gspp/1ppbppp2/9/2PPP1P2/PPSG1PNPP/1KGB1SR2/LN6L w - 34","ln5nl/1r1s2gk1/p2p1gspp/2pbppp2/1p7/2PPP1P2/PPSG1PNPP/1KGB1SR2/LN6L b - 35","ln5nl/1r1s2gk1/p2p1gspp/2pbppp2/1p7/2PPP1PP1/PPSG1PN1P/1KGB1SR2/LN6L w - 36","ln5nl/1r4gk1/p2psgspp/2pbppp2/1p7/2PPP1PP1/PPSG1PN1P/1KGB1SR2/LN6L b - 37","ln5nl/1r4gk1/p2psgspp/2pbppp2/1p7/2PPP1PPP/PPSG1PN2/1KGB1SR2/LN6L w - 38","ln5nl/1r4gk1/p2psgsp1/2pbppp1p/1p7/2PPP1PPP/PPSG1PN2/1KGB1SR2/LN6L b - 39","ln5nl/1r4gk1/p2psgsp1/2pbppp1p/1p7/2PPP1PPP/PPSGSPN2/1KGB2R2/LN6L w - 40","ln5nl/1r4gk1/p1bpsgsp1/2p1ppp1p/1p7/2PPP1PPP/PPSGSPN2/1KGB2R2/LN6L b - 41","ln5nl/1r4gk1/p1bpsgsp1/2p1ppp1p/1p7/2PPP1PPP/PPSGSPN2/LKGB2R2/1N6L w - 42","ln5nl/1r4gk1/p1bpsg1p1/2p1pppsp/1p7/2PPP1PPP/PPSGSPN2/LKGB2R2/1N6L b - 43","ln5nl/1r4gk1/p1bpsg1p1/2p1pppsp/1p7/2PPPPPPP/PPSGS1N2/LKGB2R2/1N6L w - 44","ln6l/1r4gk1/p1bpsgnp1/2p1pppsp/1p7/2PPPPPPP/PPSGS1N2/LKGB2R2/1N6L b - 45","ln6l/1r4gk1/p1bpsgnp1/2p1pppsp/1p7/2PPPPPPP/PPSG2N2/LKGB1SR2/1N6L w - 46","ln6l/1r4gk1/2bpsgnp1/p1p1pppsp/1p7/2PPPPPPP/PPSG2N2/LKGB1SR2/1N6L b - 47","ln6l/1r4gk1/2bpsgnp1/p1p1pppsp/1p7/2PPPPPPP/PPSG1SN2/LKGB2R2/1N6L w - 48","ln6l/1r4gk1/2bpsgnp1/2p1pppsp/pp7/2PPPPPPP/PPSG1SN2/LKGB2R2/1N6L b - 49","ln6l/1r4gk1/2bpsgnp1/2p1pppsp/pp5P1/2PPPPP1P/PPSG1SN2/LKGB2R2/1N6L w - 50","ln6l/1r4gk1/2bpsg1p1/2p1pppsp/pp5n1/2PPPPP1P/PPSG1SN2/LKGB2R2/1N6L b p 51","ln6l/1r4gk1/2bpsg1p1/2p1pppsp/pp5N1/2PPPPP1P/PPSG1S3/LKGB2R2/1N6L w Np 52","ln6l/1r4gk1/2bpsg1p1/2p1ppp1p/pp5s1/2PPPPP1P/PPSG1S3/LKGB2R2/1N6L b Nnp 53","ln6l/1r4gk1/2bpsg1p1/2p1ppp1p/pp5s1/2PPPPP1P/PPSG1S3/LKGB3R1/1N6L w Nnp 54","ln6l/1r4gk1/2bpsg3/2p1ppppp/pp5s1/2PPPPP1P/PPSG1S3/LKGB3R1/1N6L b Nnp 55","ln6l/1r4gk1/2bpsg3/2p1ppppp/pp5s1/2PPPPP1P/PPSG1SN2/LKGB3R1/1N6L w np 56","ln6l/1r4gk1/2bpsg3/n1p1ppppp/pp5s1/2PPPPP1P/PPSG1SN2/LKGB3R1/1N6L b p 57","ln6l/1r4gk1/2bpsg3/n1p1ppppp/pp5N1/2PPPPP1P/PPSG1S3/LKGB3R1/1N6L w Sp 58","ln6l/1r4gk1/2bpsg3/n1p1ppp1p/pp5p1/2PPPPP1P/PPSG1S3/LKGB3R1/1N6L b Snp 59","ln6l/1r4gk1/2bpsg3/n1p1ppp1p/pp4Pp1/2PPPP2P/PPSG1S3/LKGB3R1/1N6L w Snp 60","ln6l/1r4gk1/2bpsg3/n1p1pp2p/pp4pp1/2PPPP2P/PPSG1S3/LKGB3R1/1N6L b Sn2p 61","ln6l/1r4gk1/2bpsg3/n1p1pp2p/pp4pR1/2PPPP2P/PPSG1S3/LKGB5/1N6L w SPn2p 62","ln6l/1r4gk1/2bpsg1p1/n1p1pp2p/pp4pR1/2PPPP2P/PPSG1S3/LKGB5/1N6L b SPnp 63","ln6l/1r4gk1/2bpsg1p1/n1p1pp2p/pp4R2/2PPPP2P/PPSG1S3/LKGB5/1N6L w S2Pnp 64","ln6l/1r4gk1/2bpsg1p1/n1p1ppp1p/pp4R2/2PPPP2P/PPSG1S3/LKGB5/1N6L b S2Pn 65","ln6l/1r4gk1/2bpsg1p1/n1p1ppp1p/pp7/2PPPP2P/PPSG1S3/LKGB5/1N4R1L w S2Pn 66","ln6l/1r3sgk1/2bp1g1p1/n1p1ppp1p/pp7/2PPPP2P/PPSG1S3/LKGB5/1N4R1L b S2Pn 67","ln6l/1r3sgk1/2bp1g1p1/n1p1ppp1p/pp7/2PPPP2P/PPSG1S3/LKGB5/1N5RL w S2Pn 68","ln6l/1r4gk1/2bp1gsp1/n1p1ppp1p/pp7/2PPPP2P/PPSG1S3/LKGB5/1N5RL b S2Pn 69","ln6l/1r4gk1/2bp1gsp1/n1p1ppp1p/pp7/2PPPPS1P/PPSG5/LKGB5/1N5RL w S2Pn 70","ln6l/1r4gk1/2bp1g1p1/n1p1pppsp/pp7/2PPPPS1P/PPSG5/LKGB5/1N5RL b S2Pn 71","ln6l/1r4gk1/2bp1g1p1/n1p1pppsp/pp7/2PPPPS1P/PPSG5/LKGB4L/1N5R1 w S2Pn 72","l7l/1r4gk1/n1bp1g1p1/n1p1pppsp/pp7/2PPPPS1P/PPSG5/LKGB4L/1N5R1 b S2Pn 73","l7l/1r4gk1/n1bp1g1p1/n1p1pppsp/pp7/P1PPPPS1P/1PSG5/LKGB4L/1N5R1 w S2Pn 74","l7l/1r4gk1/n1bp1g1p1/n1p1pppsp/p8/PpPPPPS1P/1PSG5/LKGB4L/1N5R1 b S2Pn 75","l7l/1r4gk1/n1bp1g1p1/n1p1pppsp/p8/PPPPPPS1P/2SG5/LKGB4L/1N5R1 w S3Pn 76","l7l/1r4gk1/n1bp1g1p1/n1p1pppsp/9/pPPPPPS1P/2SG5/LKGB4L/1N5R1 b S3Pnp 77","l7l/1r4gk1/n1bp1g1p1/n1p1pppsp/P8/pPPPPPS1P/2SG5/LKGB4L/1N5R1 w S2Pnp 78","l7l/1r4gk1/n2p1g1p1/n1p1pppsp/b8/pPPPPPS1P/2SG5/LKGB4L/1N5R1 b S2Pn2p 79","l7l/1r4gk1/n2p1g1p1/n1p1pppsp/b8/LPPPPPS1P/2SG5/1KGB4L/1N5R1 w S3Pn2p 80","l7l/1r4gk1/n2p1g1p1/n1p1pppsp/9/LbPPPPS1P/2SG5/1KGB4L/1N5R1 b S3Pn3p 81","l7l/1r4gk1/n2p1g1p1/n1p1pppsp/9/LbPPPPS1P/1PSG5/1KGB4L/1N5R1 w S2Pn3p 82","l7l/1r4gk1/n2p1g1p1/n1p1pppsp/9/L1PPPPS1P/1P+bG5/1KGB4L/1N5R1 b S2Psn3p 83","l7l/1r4gk1/n2p1g1p1/n1p1pppsp/9/L1PPPPS1P/1PBG5/1KG5L/1N5R1 w BS2Psn3p 84","l7l/1r4gk1/n2p1g1p1/n1p1pppsp/9/LpPPPPS1P/1PBG5/1KG5L/1N5R1 b BS2Psn2p 85","l7l/1r4gk1/n2p1g1p1/n1p1pppsp/9/LPPPPPS1P/2BG5/1KG5L/1N5R1 w BS3Psn2p 86","l7l/1r4gk1/n2p1g1p1/n1p1pppsp/9/LPPPPPS1P/1pBG5/1KG5L/1N5R1 b BS3Psnp 87","l7l/1r4gk1/n2p1g1p1/n1p1pppsp/9/LPPPPPS1P/1GBG5/1K6L/1N5R1 w BS4Psnp 88","l7l/1r4gk1/n2p1g1p1/n1p1pppsp/1p7/LPPPPPS1P/1GBG5/1K6L/1N5R1 b BS4Psn 89","l7l/1r4gk1/n2p1g1p1/L1p1pppsp/1p7/1PPPPPS1P/1GBG5/1K6L/1N5R1 w BSN4Psn 90","l7l/1r4gk1/n2p1g1p1/L1p1pppsp/np7/1PPPPPS1P/1GBG5/1K6L/1N5R1 b BSN4Ps 91","l7l/1r4gk1/n2p1g1p1/L1p1pppsp/np7/SPPPPPS1P/1GBG5/1K6L/1N5R1 w BN4Ps 92","l7l/1r4gk1/n2p1g1p1/L1p1pppsp/1p7/SPPPPPS1P/1+nBG5/1K6L/1N5R1 b BN4Pgs 93","l7l/1r4gk1/n2p1g1p1/L1p1pppsp/1p7/1PPPPPS1P/1SBG5/1K6L/1N5R1 w B2N4Pgs 94","l7l/1r4gk1/n2p1g1p1/L1p1pppsp/9/1pPPPPS1P/1SBG5/1K6L/1N5R1 b B2N4Pgsp 95","l7l/1r4gk1/n2p1g1p1/L1p1pppsp/9/1BPPPPS1P/1S1G5/1K6L/1N5R1 w B2N5Pgsp 96","l7l/1r4gk1/n2p1g1p1/L1p1pppsp/9/sBPPPPS1P/1S1G5/1K6L/1N5R1 b B2N5Pgp 97","l7l/1r4gk1/n2p1g1p1/L1p1pppsp/9/sBPPPPS1P/1SG6/1K6L/1N5R1 w B2N5Pgp 98","l7l/1r4gk1/n2p1g1p1/L1p1pppsp/9/1BPPPPS1P/1+sG6/1K6L/1N5R1 b B2N5Pgsp 99","l7l/1r4gk1/n2p1g1p1/L1p1pppsp/9/1BPPPPS1P/1G7/1K6L/1N5R1 w BS2N5Pgsp 100","l7l/1r4gk1/n2p1g1p1/L1p1pppsp/1s7/1BPPPPS1P/1G7/1K6L/1N5R1 b BS2N5Pgp 101","l7l/1r4gk1/nP1p1g1p1/L1p1pppsp/1s7/1BPPPPS1P/1G7/1K6L/1N5R1 w BS2N4Pgp 102","l7l/6gk1/nr1p1g1p1/L1p1pppsp/1s7/1BPPPPS1P/1G7/1K6L/1N5R1 b BS2N4Pg2p 103","l7l/6gk1/nr1p1g1p1/LPp1pppsp/1s7/1BPPPPS1P/1G7/1K6L/1N5R1 w BS2N3Pg2p 104","l7l/6gk1/n2p1g1p1/Lrp1pppsp/1s7/1BPPPPS1P/1G7/1K6L/1N5R1 b BS2N3Pg3p 105","l7l/6gk1/n2p1g1p1/Lrp1pppsp/Ss7/1BPPPPS1P/1G7/1K6L/1N5R1 w B2N3Pg3p 106","l7l/6gk1/n2p1g1p1/Lrp1pppsp/S8/1sPPPPS1P/1G7/1K6L/1N5R1 b B2N3Pbg3p 107","l7l/6gk1/n2p1g1p1/Lrp1pppsp/S8/1GPPPPS1P/9/1K6L/1N5R1 w BS2N3Pbg3p 108","l7l/6gk1/n2p1g1p1/Lrp1pppsp/S8/1GPPPPS1P/1p7/1K6L/1N5R1 b BS2N3Pbg2p 109","l7l/6gk1/n2p1g1p1/Lrp1pppsp/S8/1GPPPPS1P/1p7/2K5L/1N5R1 w BS2N3Pbg2p 110","l7l/6gk1/n2p1g1p1/L1p1pppsp/S8/1rPPPPS1P/1p7/2K5L/1N5R1 b BS2N3Pb2g2p 111","l7l/6gk1/n2p1g1p1/L1p1pppsp/9/1SPPPPS1P/1p7/2K5L/1N5R1 w RBS2N3Pb2g2p 112","l7l/6gk1/n2p1g1p1/L1p1pppsp/9/1SPPPPS1P/1p7/2K1b3L/1N5R1 b RBS2N3P2g2p 113","l7l/6gk1/n2p1g1p1/L1p1pppsp/9/1SPPPPS1P/1p7/2K1b3L/1NN4R1 w RBSN3P2g2p 114","l7l/6gk1/n2p1g1p1/L1p1pppsp/9/1SPPPPS1P/1p7/1gK1b3L/1NN4R1 b RBSN3Pg2p 115","l7l/6gk1/n2p1g1p1/L1p1pppsp/9/1SPPPPS1P/1pK6/1g2b3L/1NN4R1 w RBSN3Pg2p 116","l7l/6gk1/n2p1g1p1/L1p1pppsp/9/1SPPPPS1P/1pK6/1gg1b3L/1NN4R1 b RBSN3P2p 117"]
+        }
+      };
+
+      var KANJI = {"P":"歩","L":"香","N":"桂","S":"銀","G":"金","B":"角","R":"飛","K":"玉","+P":"と","+L":"成香","+N":"成桂","+S":"成銀","+B":"馬","+R":"龍"};
+      var FILES = ["9","8","7","6","5","4","3","2","1"];
+      var RANKS = ["一","二","三","四","五","六","七","八","九"];
+      var HAND_ORDER = ["R","B","G","S","N","L","P"];
+
+      var state = {};
+      var current = "ryuou39-3";
+
+      var boardEl = document.getElementById("board");
+      var infoEl = document.getElementById("info");
+      var slider = document.getElementById("slider");
+      var prevBtn = document.getElementById("prev");
+      var nextBtn = document.getElementById("next");
+
+      function parseSfen(sfen){
+        var parts = sfen.split(" ");
+        var rows = parts[0].split("/");
+        var cells = [];
+        for (var r = 0; r < rows.length; r++){
+          var row = rows[r];
+          for (var i = 0; i < row.length; i++){
+            var ch = row[i];
+            if (ch >= "0" && ch <= "9"){
+              var n = parseInt(ch, 10);
+              for (var j = 0; j < n; j++) cells.push(null);
+            } else if (ch === "+"){
+              var p = row[i+1];
+              cells.push({ sym: "+" + p.toUpperCase(), gote: p === p.toLowerCase(), promo: true });
+              i++;
+            } else {
+              cells.push({ sym: ch.toUpperCase(), gote: ch === ch.toLowerCase(), promo: false });
+            }
+          }
+        }
+        return { cells: cells, turn: parts[1], hand: parts[2] || "-" };
+      }
+
+      function handText(hand, sente){
+        if (!hand || hand === "-") return "なし";
+        var counts = {};
+        var re = /(\d*)([A-Za-z])/g, m;
+        while ((m = re.exec(hand)) !== null){
+          var sym = m[2];
+          var isSente = sym === sym.toUpperCase();
+          if (isSente === sente){
+            var key = sym.toUpperCase();
+            counts[key] = (counts[key] || 0) + (m[1] ? parseInt(m[1], 10) : 1);
+          }
+        }
+        var out = [];
+        for (var i = 0; i < HAND_ORDER.length; i++){
+          var k = HAND_ORDER[i];
+          if (counts[k]) out.push(KANJI[k] + (counts[k] > 1 ? counts[k] : ""));
+        }
+        return out.length ? out.join(" ") : "なし";
+      }
+
+      function render(){
+        var game = GAMES[current];
+        var idx = state[current];
+        var parsed = parseSfen(game.sfens[idx]);
+        var html = "";
+        var f, r, c;
+        for (f = 0; f < 9; f++) html += '<div class="coord file">' + FILES[f] + "</div>";
+        html += '<div class="coord file"></div>';
+        for (r = 0; r < 9; r++){
+          for (c = 0; c < 9; c++){
+            var cell = parsed.cells[r * 9 + c];
+            if (cell){
+              var label = KANJI[cell.sym];
+              html += '<div class="cell"><div class="piece' + (cell.gote ? " gote" : "") + (cell.promo ? " promo" : "") + (label.length > 1 ? " two" : "") + '"><div class="piece-in"><span>' + label + "</span></div></div></div>";
+            } else {
+              html += '<div class="cell"></div>';
+            }
+          }
+          html += '<div class="coord rank">' + RANKS[r] + "</div>";
+        }
+        boardEl.innerHTML = html;
+        document.getElementById("hand-sente").textContent = handText(parsed.hand, true);
+        document.getElementById("hand-gote").textContent = handText(parsed.hand, false);
+        var last = game.sfens.length - 1;
+        var realEnd = (typeof game.realEnd === "number") ? game.realEnd : last;
+        if (idx > realEnd && game.refLabels && game.refLabels[idx]){
+          infoEl.textContent = game.refLabels[idx];
+        } else if (idx > realEnd){
+          infoEl.textContent = "参考手順 " + (idx - realEnd) + "手目";
+        } else if (idx === realEnd && realEnd > 0){
+          infoEl.textContent = "終局 " + idx + "手目 ／ 全" + realEnd + "手";
+        } else {
+          infoEl.textContent = idx + "手目 ／ 全" + realEnd + "手（" + (parsed.turn === "b" ? "先手" : "後手") + "の手番）";
+        }
+        var jumpBtns = document.querySelectorAll("#jumps .jump");
+        for (var j = 0; j < jumpBtns.length; j++){
+          jumpBtns[j].setAttribute("aria-pressed", parseInt(jumpBtns[j].getAttribute("data-ply"), 10) === idx ? "true" : "false");
+        }
+        slider.max = last;
+        slider.value = idx;
+        document.getElementById("slider-max").textContent = last > realEnd ? "参考手順まで" : realEnd + "手目";
+        prevBtn.disabled = idx <= 0;
+        nextBtn.disabled = idx >= last;
+      }
+
+      function realEndOf(game){
+        return (typeof game.realEnd === "number") ? game.realEnd : game.sfens.length - 1;
+      }
+      function defaultPly(game){
+        if (typeof game.startAt === "number") return game.startAt;
+        if (game.startAt === "end") return realEndOf(game);
+        return 0;
+      }
+      function clampPly(game, n){
+        var last = game.sfens.length - 1;
+        if (isNaN(n) || n < 0) return 0;
+        return n > last ? last : n;
+      }
+      function rawHashString(){
+        var h = "";
+        try { h = location.hash || ""; } catch (e) {}
+        if (!h || h === "#"){
+          try { if (window.parent && window.parent !== window) h = window.parent.location.hash || h; } catch (e) {}
+        }
+        if (!h || h === "#"){
+          try { if (window.top && window.top !== window) h = window.top.location.hash || h; } catch (e) {}
+        }
+        return h || "";
+      }
+      function parseHash(){
+        var raw = rawHashString();
+        if (raw.charAt(0) === "#") raw = raw.slice(1);
+        if (!raw) return null;
+        try { raw = decodeURIComponent(raw); } catch (e) {}
+        raw = raw.replace(/^\//, "").replace(/\s+$/, "");
+        if (!raw) return null;
+        var at = raw.indexOf("@");
+        if (at >= 0){
+          return { id: raw.slice(0, at), ply: parseInt(raw.slice(at + 1), 10), hasPly: true };
+        }
+        return { id: raw, ply: null, hasPly: false };
+      }
+      function parseQuery(){
+        var s = "";
+        try { s = location.search || ""; } catch (e) {}
+        if (!s) return null;
+        var params = {};
+        var pairs = s.replace(/^\?/, "").split("&");
+        for (var i = 0; i < pairs.length; i++){
+          var kv = pairs[i].split("=");
+          if (kv.length < 2) continue;
+          var key = kv[0], val = kv.slice(1).join("=");
+          try { val = decodeURIComponent(val); } catch (e) {}
+          params[key] = val;
+        }
+        var id = params.game || params.g || null;
+        if (!id || !GAMES[id]) return null;
+        var plyRaw = (typeof params.ply !== "undefined") ? params.ply : params.p;
+        if (typeof plyRaw !== "undefined" && plyRaw !== ""){
+          return { id: id, ply: parseInt(plyRaw, 10), hasPly: true };
+        }
+        return { id: id, ply: null, hasPly: false };
+      }
+      var userMoved = false;
+      function applyTarget(t){
+        if (!t || !GAMES[t.id]) return false;
+        if (t.hasPly) selectGame(t.id, false, t.ply);
+        else selectGame(t.id, false, defaultPly(GAMES[t.id]));
+        return true;
+      }
+      function applyDeepLink(fromHash){
+        if (!fromHash){
+          if (applyTarget(parseQuery())) return true;
+        }
+        return applyTarget(parseHash());
+      }
+
+      function selectGame(id, pushHash, ply){
+        if (!GAMES[id]) id = "ryuou39-3";
+        current = id;
+        var game = GAMES[id];
+        if (typeof ply === "number" && !isNaN(ply)){
+          state[id] = clampPly(game, ply);
+        } else if (typeof state[id] !== "number"){
+          state[id] = defaultPly(game);
+        }
+        document.getElementById("g-title").textContent = game.title;
+        document.getElementById("g-players").textContent = game.players;
+        document.getElementById("g-highlight").textContent = game.highlight;
+        var noteSec = document.getElementById("g-note");
+        if (game.note){
+          document.getElementById("g-note-title").textContent = game.noteTitle || "";
+          document.getElementById("g-note-text").textContent = game.note;
+          noteSec.hidden = false;
+        } else {
+          noteSec.hidden = true;
+        }
+        var link = document.getElementById("g-article");
+        link.href = game.article;
+        var jumpsEl = document.getElementById("jumps");
+        jumpsEl.innerHTML = "";
+        if (game.jumps){
+          for (var k = 0; k < game.jumps.length; k++){
+            (function(jump){
+              var b = document.createElement("button");
+              b.type = "button";
+              b.className = "jump";
+              b.textContent = jump.label;
+              b.setAttribute("data-ply", jump.ply);
+              b.setAttribute("aria-pressed", "false");
+              b.addEventListener("click", function(){
+                userMoved = true;
+                state[current] = clampPly(GAMES[current], jump.ply);
+                render();
+              });
+              jumpsEl.appendChild(b);
+            })(game.jumps[k]);
+          }
+        }
+        var tabs = document.querySelectorAll(".tab");
+        for (var i = 0; i < tabs.length; i++){
+          tabs[i].setAttribute("aria-selected", tabs[i].getAttribute("data-game") === id ? "true" : "false");
+        }
+        if (pushHash && location.hash !== "#" + id){
+          history.replaceState(null, "", "#" + id);
+        }
+        render();
+      }
+
+      var tabBtns = document.querySelectorAll(".tab");
+      for (var i = 0; i < tabBtns.length; i++){
+        tabBtns[i].addEventListener("click", function(){ userMoved = true; selectGame(this.getAttribute("data-game"), true); });
+      }
+      prevBtn.addEventListener("click", function(){ if (state[current] > 0){ userMoved = true; state[current]--; render(); } });
+      nextBtn.addEventListener("click", function(){ if (state[current] < GAMES[current].sfens.length - 1){ userMoved = true; state[current]++; render(); } });
+      slider.addEventListener("input", function(){ userMoved = true; state[current] = parseInt(slider.value, 10); render(); });
+      document.addEventListener("keydown", function(e){
+        if (e.key === "ArrowLeft") prevBtn.click();
+        if (e.key === "ArrowRight") nextBtn.click();
+      });
+      window.addEventListener("hashchange", function(){ applyDeepLink(true); });
+      window.addEventListener("load", function(){ if (!userMoved) applyDeepLink(false); });
+
+      (function(){
+        if (!applyDeepLink(false)) selectGame("ryuou39-3", false);
+      })();
+    </script>
+  </body>
+</html>
