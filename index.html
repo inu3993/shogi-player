@@ -167,7 +167,7 @@
         <button class="tab" role="tab" id="tab-aikakari" data-game="aikakari" aria-selected="false">相掛かり<small>基本形・代表手順11手</small></button>
         <button class="tab" role="tab" id="tab-ureshino" data-game="ureshino" aria-selected="false">嬉野流<small>基本形・代表手順11手</small></button>
         <button class="tab" role="tab" id="tab-kakugawari-bogin" data-game="kakugawari-bogin" aria-selected="false">角換わり棒銀<small>第3-1図からの定跡・28手</small></button>
-        <button class="tab" role="tab" id="tab-kakugawari-hayakurigin" data-game="kakugawari-hayakurigin" aria-selected="false">角換わり早繰り銀<small>基本形からの変化・2手</small></button>
+        <button class="tab" role="tab" id="tab-kakugawari-hayakurigin" data-game="kakugawari-hayakurigin" aria-selected="false">角換わり早繰り銀<small>銀矢倉からの変化・2手</small></button>
       </div>
       <p class="howto">ボタンやスライダーで手を進めたり戻したりできます。「見たい局面」のボタンで、封じ手や決め手、終局図へ直接移動できます。</p>
 
@@ -365,15 +365,15 @@
         },
         "kakugawari-hayakurigin": {
           title: "角換わり早繰り銀",
-          players: "角換わり早繰り銀 ― 基本形から△3五歩▲同銀までの変化2手（Wikipedia「角換わり」第6-17図）",
-          highlight: "角換わりで先手の銀が4六に繰り出し、6八玉型に構えた基本形から、後手が△3五歩と仕掛けて▲同銀と取らせる変化を示した盤です。記事では、このあと後手の8筋の継ぎ歩攻めも有力とされています。",
+          players: "角換わり早繰り銀 ― 銀矢倉の形から△3五歩▲同銀までの変化2手（Wikipedia「角換わり」第6-17図）",
+          highlight: "角換わり早繰り銀に対して後手が銀矢倉に組んだ形から、後手が△3五歩と突いて▲同銀と取らせる変化を示した盤です。記事では、このあと後手の8筋の継ぎ歩攻めも有力とされています。",
           article: "https://sorita08shogi.hatenablog.com/entry/2026/11/21/102807",
           startAt: "end",
-          jumps: [{ label: "基本形", ply: 0 }, { label: "▲同銀まで（2手目）", ply: 2 }],
+          jumps: [{ label: "銀矢倉の形", ply: 0 }, { label: "▲同銀まで（2手目）", ply: 2 }],
           realEnd: 2,
           noteTitle: "この盤について",
-          note: "この盤は記事「角換わり早繰り銀とは？」の基本図を起点に、記事に明記された△3五歩▲同銀の2手だけを並べたものです。起点局面がWikipedia「角換わり」第6-17図と一致すること、2手とも合法手として通ることを確認しています。",
-          sfens: ["ln5nl/1r2gkg2/2p1pssp1/p2p1pp1p/1p4PP1/P1PP1S2P/1PS1PP3/2G1G2R1/LNK4NL w Bb 1", "ln5nl/1r2gkg2/2p1pssp1/p2p1p2p/1p4pP1/P1PP1S2P/1PS1PP3/2G1G2R1/LNK4NL b Bbp 2", "ln5nl/1r2gkg2/2p1pssp1/p2p1p2p/1p4SP1/P1PP4P/1PS1PP3/2G1G2R1/LNK4NL w BPbp 3"]
+          note: "この盤は記事「角換わり早繰り銀とは？」の銀矢倉の図（Wikipedia「角換わり」第6-17図）を起点に、記事に明記された△3五歩▲同銀の2手だけを並べたものです。起点局面が第6-17図と一致すること、2手とも合法手として通ることを確認しています。",
+          sfens: ["l6nl/1r2gkg2/2p1pssp1/p2p1pp1p/1p4PP1/P1PP1S2P/1PS1PP3/2G1G2R1/LNK4NL w Bbp 1", "l6nl/1r2gkg2/2p1pssp1/p2p1p2p/1p4pP1/P1PP1S2P/1PS1PP3/2G1G2R1/LNK4NL b Bb2p 2", "l6nl/1r2gkg2/2p1pssp1/p2p1p2p/1p4SP1/P1PP4P/1PS1PP3/2G1G2R1/LNK4NL w BPb2p 3"]
         }
       };
 
