@@ -164,6 +164,8 @@
         <button class="tab" role="tab" id="tab-junisen85-b1-watanabe-oishi" data-game="junisen85-b1-watanabe-oishi" aria-selected="false">第85期順位戦B級1組 9回戦<small>大石直嗣七段 対 渡辺明九段</small></button>
         <button class="tab" role="tab" id="tab-junisen85-a-sato-kondo" data-game="junisen85-a-sato-kondo" aria-selected="false">第85期順位戦A級 5回戦<small>近藤誠也八段 対 佐藤天彦九段</small></button>
         <button class="tab" role="tab" id="tab-pacman44" data-game="pacman44" aria-selected="false">4四歩パックマン<small>後手の奇襲戦法・代表手順16手</small></button>
+        <button class="tab" role="tab" id="tab-aikakari" data-game="aikakari" aria-selected="false">相掛かり<small>基本形・代表手順11手</small></button>
+        <button class="tab" role="tab" id="tab-ureshino" data-game="ureshino" aria-selected="false">嬉野流<small>基本形・代表手順11手</small></button>
       </div>
       <p class="howto">ボタンやスライダーで手を進めたり戻したりできます。「見たい局面」のボタンで、封じ手や決め手、終局図へ直接移動できます。</p>
 
@@ -322,6 +324,30 @@
           noteTitle: "この盤について",
           note: "この盤は戦法の代表手順を再現したものです。Wikipedia「4四歩パックマン」第1図〜第3図の盤面と照合してあり、16手の手順は全手が合法手として通ること、2手目・9手目・16手目の局面が第1図・第2図・第3図と一致することを確認しています。",
           sfens: ["lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1", "lnsgkgsnl/1r5b1/ppppppppp/9/9/2P6/PP1PPPPPP/1B5R1/LNSGKGSNL w - 2", "lnsgkgsnl/1r5b1/ppppp1ppp/5p3/9/2P6/PP1PPPPPP/1B5R1/LNSGKGSNL b - 3", "lnsgkgsnl/1r5b1/ppppp1ppp/5B3/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL w P 4", "lnsgkgsnl/5r1b1/ppppp1ppp/5B3/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL b P 5", "lnsgkgsnl/5r1b1/pppp+B1ppp/9/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL w 2P 6", "lnsgkgsnl/5r1b1/pppp+B2pp/6p2/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL b 2P 7", "lnsgkgsnl/5+B1b1/pppp3pp/6p2/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL w R2P 8", "lnsgkg1nl/5s1b1/pppp3pp/6p2/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL b R2Pb 9", "lnsgkg1nl/5s1b1/pppp3pp/6p2/9/2P6/PP1PPPPPP/1S5R1/LN1GKGSNL w R2Pb 10", "lnsgkg1nl/5s1b1/pppp3pp/6p2/b8/2P6/PP1PPPPPP/1S5R1/LN1GKGSNL b R2P 11", "lnsgkg1nl/5s1b1/pppp3pp/6p2/b8/2P6/PPSPPPPPP/7R1/LN1GKGSNL w R2P 12", "lnsgkg1nl/5s1b1/pppp3pp/6p2/9/2P6/PP+bPPPPPP/7R1/LN1GKGSNL b R2Ps 13", "lnsgkg1nl/5s1b1/pppp3pp/6p2/9/2P6/PPNPPPPPP/7R1/L2GKGSNL w RB2Ps 14", "lnsgkg1nl/5s3/pppp3pp/6p2/9/2P6/PP+bPPPPPP/7R1/L2GKGSNL b RB2Psn 15", "lnsgkg1nl/5s3/pppp3pp/6p2/9/2P6/PP+bPPPPPP/3G3R1/L3KGSNL w RB2Psn 16", "lnsgkg1nl/5s3/pppp3pp/6p2/9/2P6/PP1PPPPPP/3G3R1/+b3KGSNL b RB2Psnl 17"]
+        },
+        "aikakari": {
+          title: "相掛かり 基本形",
+          players: "相掛かりの基本形 ― 浮き飛車に構える代表手順11手（Wikipedia「相掛かり」冒頭の基本図・手順の記述）",
+          highlight: "互いに飛車先の歩を伸ばし合う相居飛車の戦型です。▲2四歩から飛車先の歩を交換し、2三に歩を打たれたところで▲2六飛と浮き飛車に引きます。ここから▲3六歩・▲3七銀の中原流や▲3七桂の速攻、飛車を左へ転換するひねり飛車など、手が広く構想力が問われる戦型です。",
+          article: "https://sorita08shogi.hatenablog.com/",
+          startAt: "end",
+          jumps: [{ label: "▲2四歩の直前（6手目）", ply: 6 }, { label: "浮き飛車形（11手目）", ply: 11 }],
+          realEnd: 11,
+          noteTitle: "この盤について",
+          note: "この盤は戦法の基本形までの代表手順を再現したものです。Wikipedia「相掛かり」の手順の記述に沿い、11手の手順は全手が合法手として通ること、10手目△2三歩が歩打ちであること、最終局面が浮き飛車の形になることを確認しています。",
+          sfens: ["lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1", "lnsgkgsnl/1r5b1/ppppppppp/9/9/7P1/PPPPPPP1P/1B5R1/LNSGKGSNL w - 2", "lnsgkgsnl/1r5b1/p1ppppppp/1p7/9/7P1/PPPPPPP1P/1B5R1/LNSGKGSNL b - 3", "lnsgkgsnl/1r5b1/p1ppppppp/1p7/7P1/9/PPPPPPP1P/1B5R1/LNSGKGSNL w - 4", "lnsgkgsnl/1r5b1/p1ppppppp/9/1p5P1/9/PPPPPPP1P/1B5R1/LNSGKGSNL b - 5", "lnsgkgsnl/1r5b1/p1ppppppp/9/1p5P1/9/PPPPPPP1P/1BG4R1/LNS1KGSNL w - 6", "lnsgk1snl/1r4gb1/p1ppppppp/9/1p5P1/9/PPPPPPP1P/1BG4R1/LNS1KGSNL b - 7", "lnsgk1snl/1r4gb1/p1ppppppp/7P1/1p7/9/PPPPPPP1P/1BG4R1/LNS1KGSNL w - 8", "lnsgk1snl/1r4gb1/p1ppppp1p/7p1/1p7/9/PPPPPPP1P/1BG4R1/LNS1KGSNL b p 9", "lnsgk1snl/1r4gb1/p1ppppp1p/7R1/1p7/9/PPPPPPP1P/1BG6/LNS1KGSNL w Pp 10", "lnsgk1snl/1r4gb1/p1ppppppp/7R1/1p7/9/PPPPPPP1P/1BG6/LNS1KGSNL b P 11", "lnsgk1snl/1r4gb1/p1ppppppp/9/1p7/7R1/PPPPPPP1P/1BG6/LNS1KGSNL w P 12"]
+        },
+        "ureshino": {
+          title: "嬉野流 基本形",
+          players: "嬉野流の基本形 ― 初手▲6八銀からの代表手順11手（Wikipedia「嬉野流」の記述）",
+          highlight: "初手▲6八銀という意表の出だしから、▲7九角・▲7八金・▲4八銀と組み、飛車先の歩を交換されたときに▲8八歩と打つのが棋書通りの指し方です。左銀を繰り出して斜め棒銀で攻める狙いがあります。",
+          article: "https://sorita08shogi.hatenablog.com/",
+          startAt: "end",
+          jumps: [{ label: "基本形（11手目）", ply: 11 }],
+          realEnd: 11,
+          noteTitle: "この盤について",
+          note: "この盤は戦法の基本形までの代表手順を再現したものです。Wikipedia「嬉野流」の概要の記述に沿い、11手の手順は全手が合法手として通ること、最終局面で先手の持駒がなく後手の持駒が歩1枚であることを確認しています。",
+          sfens: ["lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1", "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B1S3R1/LN1GKGSNL w - 2", "lnsgkgsnl/1r5b1/pppppp1pp/6p2/9/9/PPPPPPPPP/1B1S3R1/LN1GKGSNL b - 3", "lnsgkgsnl/1r5b1/pppppp1pp/6p2/9/9/PPPPPPPPP/3S3R1/LNBGKGSNL w - 4", "lnsgkgsnl/1r5b1/p1pppp1pp/1p4p2/9/9/PPPPPPPPP/3S3R1/LNBGKGSNL b - 5", "lnsgkgsnl/1r5b1/p1pppp1pp/1p4p2/9/9/PPPPPPPPP/2GS3R1/LNB1KGSNL w - 6", "lnsgkgsnl/1r5b1/p1pppp1pp/6p2/1p7/9/PPPPPPPPP/2GS3R1/LNB1KGSNL b - 7", "lnsgkgsnl/1r5b1/p1pppp1pp/6p2/1p7/9/PPPPPPPPP/2GS1S1R1/LNB1KG1NL w - 8", "lnsgkgsnl/1r5b1/p1pppp1pp/6p2/9/1p7/PPPPPPPPP/2GS1S1R1/LNB1KG1NL b - 9", "lnsgkgsnl/1r5b1/p1pppp1pp/6p2/9/1P7/P1PPPPPPP/2GS1S1R1/LNB1KG1NL w P 10", "lnsgkgsnl/7b1/p1pppp1pp/6p2/9/1r7/P1PPPPPPP/2GS1S1R1/LNB1KG1NL b Pp 11", "lnsgkgsnl/7b1/p1pppp1pp/6p2/9/1r7/P1PPPPPPP/1PGS1S1R1/LNB1KG1NL w p 12"]
         }
       };
 
