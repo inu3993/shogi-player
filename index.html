@@ -170,6 +170,8 @@
         <button class="tab" role="tab" id="tab-kakugawari-hayakurigin" data-game="kakugawari-hayakurigin" aria-selected="false">角換わり早繰り銀<small>銀矢倉からの変化・2手</small></button>
         <button class="tab" role="tab" id="tab-yagura" data-game="yagura" aria-selected="false">矢倉<small>新24手組基本形・代表手順28手</small></button>
         <button class="tab" role="tab" id="tab-tokin" data-game="tokin" aria-selected="false">頭金<small>基本形・▲1二金で詰み</small></button>
+        <button class="tab" role="tab" id="tab-kakugawari-migigyoku" data-game="kakugawari-migigyoku" aria-selected="false">角換わり右玉<small>基本形・代表手順40手</small></button>
+        <button class="tab" role="tab" id="tab-sodebisha-habu" data-game="sodebisha-habu" aria-selected="false">袖飛車 羽生式<small>後手の袖飛車・代表手順19手</small></button>
       </div>
       <p class="howto">ボタンやスライダーで手を進めたり戻したりできます。「見たい局面」のボタンで、封じ手や決め手、終局図へ直接移動できます。</p>
 
@@ -400,6 +402,30 @@
           noteTitle: "この盤について",
           note: "この盤は記事「頭金」の基本図を起点に、記事に明記された▲1二金の1手だけを並べたものです。起点局面と▲1二金の後の局面は、詰み探索（mate_solver_fast.py）で▲1二金が詰みであることを確認しています。玉が2段目にいるときや、1二に利きがないときは頭金が決まらないことも、記事の図で確認できます。",
           sfens: ["8k/5BS2/9/9/8R/9/9/9/4K4 b G 1", "8k/5BS1G/9/9/8R/9/9/9/4K4 w - 2"]
+        },
+        "kakugawari-migigyoku": {
+          title: "角換わり右玉 基本形",
+          players: "角換わり右玉の基本形 ― 先手が玉を4八に囲い、角換わりから右玉に組む構え（Wikipedia「右玉」角換わりにおける右玉の例と先手側の配置が一致、33手目▲3六歩まで）。ここから玉を5八の中住まいに移し、後手も玉を6二に寄せて相右玉になる",
+          highlight: "角換わり右玉は、玉を右辺に囲う居飛車の作戦です。角換わりでは玉を左に囲うと相手の攻撃を正面から受けることになりますが、玉が右にあれば相手の攻撃から遠く、攻撃の効果を小さくできます。基本形は玉4八・金5八と7八・銀6七と4七・桂3七・角7七で、ここから玉を5八の中住まいに移して戦います。2026年11月24日の王将戦挑戦者決定リーグ最終局では、永瀬拓矢九段が先手でこの角換わり右玉を採用しました。",
+          article: "https://sorita08shogi.hatenablog.com/",
+          startAt: "end",
+          jumps: [{ label: "基本形（33手目）", ply: 33 }, { label: "中住まい▲5八玉の直前（36手目）", ply: 36 }, { label: "相右玉△4二金の直前（39手目）", ply: 39 }],
+          realEnd: 40,
+          noteTitle: "この盤について",
+          note: "この盤は角換わり右玉の基本形までの代表手順40手を再現したものです。Wikipedia「右玉」の角換わりにおける右玉の例と先手側の配置が一致すること、全手が合法手として通ることを確認しています。33手目までの基本形から、玉を5八の中住まいに移し、後手も玉を6二に寄せて相右玉になるまでの手順です。2026年11月24日の永瀬拓矢九段の対局の棋譜そのものではありません。",
+          sfens: ["lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1","lnsgkgsnl/1r5b1/ppppppppp/9/9/2P6/PP1PPPPPP/1B5R1/LNSGKGSNL w - 2","lnsgkgsnl/1r5b1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/1B5R1/LNSGKGSNL b - 3","lnsgkgsnl/1r5b1/pppppp1pp/6p2/9/2P4P1/PP1PPPP1P/1B5R1/LNSGKGSNL w - 4","lnsgkgsnl/1r5b1/p1pppp1pp/1p4p2/9/2P4P1/PP1PPPP1P/1B5R1/LNSGKGSNL b - 5","lnsgkgsnl/1r5b1/p1pppp1pp/1p4p2/7P1/2P6/PP1PPPP1P/1B5R1/LNSGKGSNL w - 6","lnsgkgsnl/1r5b1/p1pppp1pp/6p2/1p5P1/2P6/PP1PPPP1P/1B5R1/LNSGKGSNL b - 7","lnsgkgsnl/1r5b1/p1pppp1pp/6p2/1p5P1/2P6/PPBPPPP1P/7R1/LNSGKGSNL w - 8","lnsgk1snl/1r4gb1/p1pppp1pp/6p2/1p5P1/2P6/PPBPPPP1P/7R1/LNSGKGSNL b - 9","lnsgk1snl/1r4gb1/p1pppp1pp/6p2/1p5P1/2P6/PPBPPPP1P/3S3R1/LN1GKGSNL w - 10","ln1gk1snl/1r1s2gb1/p1pppp1pp/6p2/1p5P1/2P6/PPBPPPP1P/3S3R1/LN1GKGSNL b - 11","ln1gk1snl/1r1s2gb1/p1pppp1pp/6p2/1p5P1/2PP5/PPB1PPP1P/3S3R1/LN1GKGSNL w - 12","ln1g2snl/1r1s1kgb1/p1pppp1pp/6p2/1p5P1/2PP5/PPB1PPP1P/3S3R1/LN1GKGSNL b - 13","ln1g2snl/1r1s1kgb1/p1pppp1pp/6p2/1p5P1/2PP5/PPBSPPP1P/7R1/LN1GKGSNL w - 14","ln4snl/1r1sgkgb1/p1pppp1pp/6p2/1p5P1/2PP5/PPBSPPP1P/7R1/LN1GKGSNL b - 15","ln4snl/1r1sgkgb1/p1pppp1pp/6p2/1p5P1/2PP5/PPBSPPP1P/6SR1/LN1GKG1NL w - 16","ln3ksnl/1r1sg1gb1/p1pppp1pp/6p2/1p5P1/2PP5/PPBSPPP1P/6SR1/LN1GKG1NL b - 17","ln3ksnl/1r1sg1gb1/p1pppp1pp/6p2/1p5P1/2PP1P3/PPBSP1P1P/6SR1/LN1GKG1NL w - 18","ln3k1nl/1r1sgsgb1/p1pppp1pp/6p2/1p5P1/2PP1P3/PPBSP1P1P/6SR1/LN1GKG1NL b - 19","ln3k1nl/1r1sgsgb1/p1pppp1pp/6p2/1p5P1/2PP1P3/PPBSPSP1P/7R1/LN1GKG1NL w - 20","ln3k1nl/1r1sgsgb1/p1pp1p1pp/4p1p2/1p5P1/2PP1P3/PPBSPSP1P/7R1/LN1GKG1NL b - 21","ln3k1nl/1r1sgsgb1/p1pp1p1pp/4p1p2/1p5P1/2PP1PP2/PPBSPS2P/7R1/LN1GKG1NL w - 22","ln3k1nl/1r1sgsgb1/p1p2p1pp/3pp1p2/1p5P1/2PP1PP2/PPBSPS2P/7R1/LN1GKG1NL b - 23","ln3k1nl/1r1sgsgb1/p1p2p1pp/3pp1p2/1p5P1/2PP1PP2/PPBSPSN1P/7R1/LN1GKG2L w - 24","ln3k1nl/1r2gsgb1/p1p1sp1pp/3pp1p2/1p5P1/2PP1PP2/PPBSPSN1P/7R1/LN1GKG2L b - 25","ln3k1nl/1r2gsgb1/p1p1sp1pp/3pp1p2/1p5P1/2PP1PP2/PPBSPSN1P/5K1R1/LN1G1G2L w - 26","ln3k1nl/1r2gsgb1/p1p1s2pp/3pppp2/1p5P1/2PP1PP2/PPBSPSN1P/5K1R1/LN1G1G2L b - 27","ln3k1nl/1r2gsgb1/p1p1s2pp/3pppp2/1p5P1/2PP1PP2/PPBSPSN1P/4GK1R1/LN1G4L w - 28","ln3k1nl/1r2gsgb1/p3s2pp/2ppppp2/1p5P1/2PP1PP2/PPBSPSN1P/4GK1R1/LN1G4L b - 29","ln3k1nl/1r2gsgb1/p3s2pp/2ppppp2/1p5P1/2PP1PP2/PPBSPSN1P/2G1GK1R1/LN6L w - 30","ln3k1nl/1r3sgb1/p3sg1pp/2ppppp2/1p5P1/2PP1PP2/PPBSPSN1P/2G1GK1R1/LN6L b - 31","ln3k1nl/1r3sgb1/p3sg1pp/2ppppp2/1p5P1/2PP1PP1P/PPBSPSN2/2G1GK1R1/LN6L w - 32","ln3kbnl/1r3sg2/p3sg1pp/2ppppp2/1p5P1/2PP1PP1P/PPBSPSN2/2G1GK1R1/LN6L b - 33","ln3kbnl/1r3sg2/p3sg1pp/2ppppp2/1p5P1/P1PP1PP1P/1PBSPSN2/2G1GK1R1/LN6L w - 34","ln4bnl/1r2ksg2/p3sg1pp/2ppppp2/1p5P1/P1PP1PP1P/1PBSPSN2/2G1GK1R1/LN6L b - 35","ln4bnl/1r2ksg2/p3sg1pp/2ppppp2/1p5P1/P1PP1PP1P/1PBSPSN2/2GG1K1R1/LN6L w - 36","ln4bnl/1r1k1sg2/p3sg1pp/2ppppp2/1p5P1/P1PP1PP1P/1PBSPSN2/2GG1K1R1/LN6L b - 37","ln4bnl/1r1k1sg2/p3sg1pp/2ppppp2/1p5P1/P1PP1PP1P/1PBSPSN2/2GGK2R1/LN6L w - 38","ln4bnl/1r1k2g2/p3sgspp/2ppppp2/1p5P1/P1PP1PP1P/1PBSPSN2/2GGK2R1/LN6L b - 39","ln4bnl/1r1k2g2/p3sgspp/2ppppp2/1p5P1/PPPP1PP1P/2BSPSN2/2GGK2R1/LN6L w - 40","ln4bnl/1r1k1gg2/p3s1spp/2ppppp2/1p5P1/PPPP1PP1P/2BSPSN2/2GGK2R1/LN6L b - 41"]
+        },
+        "sodebisha-habu": {
+          title: "袖飛車 羽生式",
+          players: "羽生式袖飛車の出だし ― 初手▲2六歩に△3二金、▲2五歩に△7二飛と後手が飛車を7筋に振る構え（Wikipedia「袖飛車」羽生式袖飛車、2018年棋聖戦第3局で初出）。ここから▲2四歩△同歩▲同飛△2三歩打▲2六飛と進み、▲7八金・▲5七銀と組む",
+          highlight: "羽生式袖飛車は、後手番で初手▲2六歩に△3二金、▲2五歩であれば△7二飛と飛車を7筋に振る出だしです。先手が▲2四歩と仕掛けても、△同歩▲同飛に△2三歩打と歩を打って受けることができます。先手は飛車を2六に浮かせ、▲7八金・▲5七銀と組んでいきます。後手は7筋の位を取った歩を7五まで進め、先手の角道を開けさせないのが狙いです。",
+          article: "https://sorita08shogi.hatenablog.com/",
+          startAt: "end",
+          jumps: [{ label: "△7二飛の直前（3手目）", ply: 3 }, { label: "▲7八金の直前（12手目）", ply: 12 }, { label: "▲5七銀の直前（18手目）", ply: 18 }],
+          realEnd: 19,
+          noteTitle: "この盤について",
+          note: "この盤はWikipedia「袖飛車」の羽生式袖飛車の図までの代表手順19手を再現したものです。△7二飛までの局面・▲7八金までの局面・▲5七銀までの局面がWikipediaの図と一致すること、全手が合法手として通ることを確認しています。",
+          sfens: ["lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1","lnsgkgsnl/1r5b1/ppppppppp/9/9/7P1/PPPPPPP1P/1B5R1/LNSGKGSNL w - 2","lnsgk1snl/1r4gb1/ppppppppp/9/9/7P1/PPPPPPP1P/1B5R1/LNSGKGSNL b - 3","lnsgk1snl/1r4gb1/ppppppppp/9/7P1/9/PPPPPPP1P/1B5R1/LNSGKGSNL w - 4","lnsgk1snl/2r3gb1/ppppppppp/9/7P1/9/PPPPPPP1P/1B5R1/LNSGKGSNL b - 5","lnsgk1snl/2r3gb1/ppppppppp/7P1/9/9/PPPPPPP1P/1B5R1/LNSGKGSNL w - 6","lnsgk1snl/2r3gb1/ppppppp1p/7p1/9/9/PPPPPPP1P/1B5R1/LNSGKGSNL b p 7","lnsgk1snl/2r3gb1/ppppppp1p/7R1/9/9/PPPPPPP1P/1B7/LNSGKGSNL w Pp 8","lnsgk1snl/2r3gb1/ppppppppp/7R1/9/9/PPPPPPP1P/1B7/LNSGKGSNL b P 9","lnsgk1snl/2r3gb1/ppppppppp/9/9/7R1/PPPPPPP1P/1B7/LNSGKGSNL w P 10","lnsgk1snl/2r3gb1/pp1pppppp/2p6/9/7R1/PPPPPPP1P/1B7/LNSGKGSNL b P 11","lnsgk1snl/2r3gb1/pp1pppppp/2p6/9/7R1/PPPPPPP1P/1B3S3/LNSGKG1NL w P 12","lnsgk1snl/2r3gb1/pp1pppppp/9/2p6/7R1/PPPPPPP1P/1B3S3/LNSGKG1NL b P 13","lnsgk1snl/2r3gb1/pp1pppppp/9/2p6/7R1/PPPPPPP1P/1BG2S3/LNS1KG1NL w P 14","lnsgk1snl/2r3gb1/pp1ppp1pp/6p2/2p6/7R1/PPPPPPP1P/1BG2S3/LNS1KG1NL b P 15","lnsgk1snl/2r3gb1/pp1ppp1pp/6p2/2p6/4P2R1/PPPP1PP1P/1BG2S3/LNS1KG1NL w P 16","l1sgk1snl/2r3gb1/ppnppp1pp/6p2/2p6/4P2R1/PPPP1PP1P/1BG2S3/LNS1KG1NL b P 17","l1sgk1snl/2r3gb1/ppnppp1pp/6p2/2p6/4P2R1/PPPP1PP1P/1BGS1S3/LN2KG1NL w P 18","l1sg2snl/2r2kgb1/ppnppp1pp/6p2/2p6/4P2R1/PPPP1PP1P/1BGS1S3/LN2KG1NL b P 19","l1sg2snl/2r2kgb1/ppnppp1pp/6p2/2p6/4P2R1/PPPPSPP1P/1BGS5/LN2KG1NL w P 20"]
         }
       };
 
